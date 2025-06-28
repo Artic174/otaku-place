@@ -1,0 +1,230 @@
+<%- include('partials/header') %>
+
+<div class="container py-5">
+    <!-- Search Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-5 fw-bold mb-4">
+                <i class="bi bi-search text-primary me-3"></i>
+                Pencarian Anime
+            </h1>
+            <p class="lead text-muted">Temukan anime favorit Anda berdasarkan judul atau genre</p>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <form action="/search" method="GET" class="search-container">
+                <div class="position-relative">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" 
+                           name="q" 
+                           class="form-control search-input" 
+                           placeholder="Masukkan judul anime..." 
+                           value="<%= query %>"
+                           autocomplete="off">
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <select name="genre" class="form-select">
+                            <option value="">Semua Genre</option>
+                            <% if (genres && genres.length > 0) { %>
+                                <% genres.forEach(genre => { %>
+                                    <option value="<%= genre.mal_id %>" <%= selectedGenre == genre.mal_id ? 'selected' : '' %>>
+                                        <%= genre.name %>
+                                    </option>
+                                <% }) %>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-2"></i>Cari Anime
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Error Alert -->
+    <% if (error) { %>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% } %>
+
+    <!-- Search Results -->
+    <% if (query || selectedGenre) { %>
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="fw-bold">
+                    Hasil Pencarian
+                    <% if (query) { %>
+                        untuk "<%= query %>"
+                    <% } %>
+                    <% if (selectedGenre) { %>
+                        <% const selectedGenreName = genres.find(g => g.mal_id == selectedGenre) %>
+                        <% if (selectedGenreName) { %>
+                            - Genre: <%= selectedGenreName.name %>
+                        <% } %>
+                    <% } %>
+                </h3>
+                <% if (results && results.length > 0) { %>
+                    <p class="text-muted">Ditemukan <%= results.length %> anime</p>
+                <% } %>
+            </div>
+        </div>
+
+        <% if (results && results.length > 0) { %>
+            <div class="anime-grid">
+                <% results.forEach(anime => { %>
+                    <div class="anime-card">
+                        <a href="/anime/<%= anime.mal_id %>" class="text-decoration-none">
+                            <img src="<%= anime.images.jpg.large_image_url %>" 
+                                 alt="<%= anime.title %>" 
+                                 loading="lazy">
+                            
+                            <% if (anime.score) { %>
+                                <div class="score-badge">
+                                    <i class="bi bi-star-fill me-1"></i><%= anime.score %>
+                                </div>
+                            <% } %>
+                            
+                            <div class="anime-card-overlay">
+                                <div class="anime-title"><%= anime.title %></div>
+                                <div class="anime-info">
+                                    <% if (anime.type) { %>
+                                        <span class="badge bg-primary me-2"><%= anime.type %></span>
+                                    <% } %>
+                                    <% if (anime.episodes) { %>
+                                        <span class="text-muted"><%= anime.episodes %> Episode</span>
+                                    <% } %>
+                                </div>
+                                <% if (anime.status) { %>
+                                    <div class="mt-2">
+                                        <span class="status-badge <%= anime.status === 'Currently Airing' ? 'status-airing' : anime.status === 'Finished Airing' ? 'status-finished' : 'status-upcoming' %>">
+                                            <%= anime.status %>
+                                        </span>
+                                    </div>
+                                <% } %>
+                                <% if (anime.genres && anime.genres.length > 0) { %>
+                                    <div class="mt-2">
+                                        <% anime.genres.slice(0, 3).forEach(genre => { %>
+                                            <span class="badge bg-secondary me-1"><%= genre.name %></span>
+                                        <% }) %>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </a>
+                        
+                        <!-- Watchlist Button -->
+                        <div class="position-absolute" style="top: 10px; left: 10px;">
+                            <button class="btn btn-sm btn-outline-primary add-to-watchlist" 
+                                    data-anime-id="<%= anime.mal_id %>"
+                                    data-anime-title="<%= anime.title %>"
+                                    data-anime-image="<%= anime.images.jpg.large_image_url %>"
+                                    title="Tambah ke Watchlist">
+                                <i class="bi bi-bookmark-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+
+            <!-- Pagination -->
+            <% if (pagination && pagination.has_next_page) { %>
+                <div class="row mt-5">
+                    <div class="col-12 text-center">
+                        <nav aria-label="Search pagination">
+                            <ul class="pagination justify-content-center">
+                                <% if (pagination.current_page > 1) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?q=<%= encodeURIComponent(query) %>&genre=<%= selectedGenre %>&page=<%= pagination.current_page - 1 %>">
+                                            <i class="bi bi-chevron-left"></i> Sebelumnya
+                                        </a>
+                                    </li>
+                                <% } %>
+                                
+                                <li class="page-item active">
+                                    <span class="page-link"><%= pagination.current_page %></span>
+                                </li>
+                                
+                                <% if (pagination.has_next_page) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?q=<%= encodeURIComponent(query) %>&genre=<%= selectedGenre %>&page=<%= pagination.current_page + 1 %>">
+                                            Selanjutnya <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                <% } %>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            <% } %>
+        <% } else { %>
+            <div class="text-center py-5">
+                <i class="bi bi-search" style="font-size: 5rem; color: var(--text-secondary);"></i>
+                <h4 class="mt-3">Tidak ada hasil ditemukan</h4>
+                <p class="text-muted">Coba gunakan kata kunci yang berbeda atau pilih genre lain</p>
+            </div>
+        <% } %>
+    <% } else { %>
+        <!-- Popular Genres -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h3 class="fw-bold mb-4">Genre Populer</h3>
+                <div class="row">
+                    <% if (genres && genres.length > 0) { %>
+                        <% const popularGenres = genres.slice(0, 12) %>
+                        <% popularGenres.forEach(genre => { %>
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <a href="/search?genre=<%= genre.mal_id %>" class="btn btn-outline-primary w-100">
+                                    <%= genre.name %>
+                                </a>
+                            </div>
+                        <% }) %>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Tips -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-lightbulb text-warning me-2"></i>
+                            Tips Pencarian
+                        </h5>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Gunakan kata kunci dalam bahasa Inggris atau Jepang
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Coba singkatan atau nama alternatif anime
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Filter berdasarkan genre untuk hasil yang lebih spesifik
+                            </li>
+                            <li class="mb-0">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Minimal 2 karakter untuk memulai pencarian
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
+

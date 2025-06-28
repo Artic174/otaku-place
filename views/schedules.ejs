@@ -1,0 +1,286 @@
+<%- include('partials/header') %>
+
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-5 fw-bold mb-4">
+                <i class="bi bi-calendar-week text-success me-3"></i>
+                Jadwal Rilis Anime
+            </h1>
+            <p class="lead text-muted">Jadwal tayang anime berdasarkan hari dalam seminggu</p>
+        </div>
+    </div>
+
+    <!-- Day Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <a href="/schedules" class="btn <%= !currentDay ? 'btn-success' : 'btn-outline-success' %>">
+                    Semua Hari
+                </a>
+                <a href="/schedules?day=monday" class="btn <%= currentDay === 'monday' ? 'btn-success' : 'btn-outline-success' %>">
+                    Senin
+                </a>
+                <a href="/schedules?day=tuesday" class="btn <%= currentDay === 'tuesday' ? 'btn-success' : 'btn-outline-success' %>">
+                    Selasa
+                </a>
+                <a href="/schedules?day=wednesday" class="btn <%= currentDay === 'wednesday' ? 'btn-success' : 'btn-outline-success' %>">
+                    Rabu
+                </a>
+                <a href="/schedules?day=thursday" class="btn <%= currentDay === 'thursday' ? 'btn-success' : 'btn-outline-success' %>">
+                    Kamis
+                </a>
+                <a href="/schedules?day=friday" class="btn <%= currentDay === 'friday' ? 'btn-success' : 'btn-outline-success' %>">
+                    Jumat
+                </a>
+                <a href="/schedules?day=saturday" class="btn <%= currentDay === 'saturday' ? 'btn-success' : 'btn-outline-success' %>">
+                    Sabtu
+                </a>
+                <a href="/schedules?day=sunday" class="btn <%= currentDay === 'sunday' ? 'btn-success' : 'btn-outline-success' %>">
+                    Minggu
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Alert -->
+    <% if (error) { %>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% } %>
+
+    <!-- Schedule Content -->
+    <% if (currentDay) { %>
+        <!-- Single Day Schedule -->
+        <% if (schedules && schedules.length > 0) { %>
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h3 class="fw-bold text-capitalize">
+                        Jadwal <%= currentDay === 'monday' ? 'Senin' : 
+                                   currentDay === 'tuesday' ? 'Selasa' :
+                                   currentDay === 'wednesday' ? 'Rabu' :
+                                   currentDay === 'thursday' ? 'Kamis' :
+                                   currentDay === 'friday' ? 'Jumat' :
+                                   currentDay === 'saturday' ? 'Sabtu' : 'Minggu' %>
+                    </h3>
+                    <p class="text-muted">Ditemukan <%= schedules.length %> anime</p>
+                </div>
+            </div>
+
+            <div class="anime-grid">
+                <% schedules.forEach(anime => { %>
+                    <div class="anime-card">
+                        <a href="/anime/<%= anime.mal_id %>" class="text-decoration-none">
+                            <img src="<%= anime.images.jpg.large_image_url %>" 
+                                 alt="<%= anime.title %>" 
+                                 loading="lazy">
+                            
+                            <% if (anime.score) { %>
+                                <div class="score-badge">
+                                    <i class="bi bi-star-fill me-1"></i><%= anime.score %>
+                                </div>
+                            <% } %>
+                            
+                            <div class="anime-card-overlay">
+                                <div class="anime-title"><%= anime.title %></div>
+                                <div class="anime-info">
+                                    <% if (anime.type) { %>
+                                        <span class="badge bg-success me-2"><%= anime.type %></span>
+                                    <% } %>
+                                    <% if (anime.episodes) { %>
+                                        <span class="text-muted"><%= anime.episodes %> Episode</span>
+                                    <% } %>
+                                </div>
+                                <% if (anime.broadcast) { %>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="bi bi-broadcast me-1"></i>
+                                            <%= anime.broadcast.day %> <%= anime.broadcast.time || '' %>
+                                        </small>
+                                    </div>
+                                <% } %>
+                                <% if (anime.status) { %>
+                                    <div class="mt-2">
+                                        <span class="status-badge <%= anime.status === 'Currently Airing' ? 'status-airing' : anime.status === 'Finished Airing' ? 'status-finished' : 'status-upcoming' %>">
+                                            <%= anime.status %>
+                                        </span>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </a>
+                        
+                        <!-- Watchlist Button -->
+                        <div class="position-absolute" style="top: 10px; left: 10px;">
+                            <button class="btn btn-sm btn-outline-primary add-to-watchlist" 
+                                    data-anime-id="<%= anime.mal_id %>"
+                                    data-anime-title="<%= anime.title %>"
+                                    data-anime-image="<%= anime.images.jpg.large_image_url %>"
+                                    title="Tambah ke Watchlist">
+                                <i class="bi bi-bookmark-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x" style="font-size: 5rem; color: var(--text-secondary);"></i>
+                <h4 class="mt-3">Tidak ada jadwal untuk hari ini</h4>
+                <p class="text-muted">Coba pilih hari lain atau lihat semua jadwal</p>
+            </div>
+        <% } %>
+    <% } else { %>
+        <!-- All Days Schedule -->
+        <% if (schedules && Object.keys(schedules).length > 0) { %>
+            <% const dayNames = {
+                monday: 'Senin',
+                tuesday: 'Selasa', 
+                wednesday: 'Rabu',
+                thursday: 'Kamis',
+                friday: 'Jumat',
+                saturday: 'Sabtu',
+                sunday: 'Minggu'
+            } %>
+            
+            <% Object.keys(dayNames).forEach(day => { %>
+                <% if (schedules[day] && schedules[day].length > 0) { %>
+                    <div class="schedule-day mb-5">
+                        <h3 class="fw-bold text-success border-bottom border-success pb-2 mb-4">
+                            <i class="bi bi-calendar-day me-2"></i>
+                            <%= dayNames[day] %>
+                            <span class="badge bg-success ms-2"><%= schedules[day].length %> anime</span>
+                        </h3>
+                        
+                        <div class="row">
+                            <% schedules[day].slice(0, 8).forEach(anime => { %>
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="schedule-item">
+                                        <img src="<%= anime.images.jpg.image_url %>" 
+                                             alt="<%= anime.title %>" 
+                                             loading="lazy">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">
+                                                <a href="/anime/<%= anime.mal_id %>" class="text-decoration-none text-light">
+                                                    <%= anime.title %>
+                                                </a>
+                                            </h6>
+                                            <div class="d-flex align-items-center gap-2 mb-2">
+                                                <% if (anime.type) { %>
+                                                    <span class="badge bg-primary"><%= anime.type %></span>
+                                                <% } %>
+                                                <% if (anime.score) { %>
+                                                    <span class="badge bg-warning">
+                                                        <i class="bi bi-star-fill me-1"></i><%= anime.score %>
+                                                    </span>
+                                                <% } %>
+                                            </div>
+                                            <% if (anime.broadcast) { %>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    <%= anime.broadcast.time || 'Waktu tidak diketahui' %>
+                                                </small>
+                                            <% } %>
+                                        </div>
+                                        <div class="ms-2">
+                                            <button class="btn btn-sm btn-outline-primary add-to-watchlist" 
+                                                    data-anime-id="<%= anime.mal_id %>"
+                                                    data-anime-title="<%= anime.title %>"
+                                                    data-anime-image="<%= anime.images.jpg.large_image_url %>"
+                                                    title="Tambah ke Watchlist">
+                                                <i class="bi bi-bookmark-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                        
+                        <% if (schedules[day].length > 8) { %>
+                            <div class="text-center mt-3">
+                                <a href="/schedules?day=<%= day %>" class="btn btn-outline-success">
+                                    Lihat Semua (<%= schedules[day].length %> anime)
+                                </a>
+                            </div>
+                        <% } %>
+                    </div>
+                <% } %>
+            <% }) %>
+        <% } else { %>
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-x" style="font-size: 5rem; color: var(--text-secondary);"></i>
+                <h4 class="mt-3">Tidak ada jadwal tersedia</h4>
+                <p class="text-muted">Data jadwal sedang tidak tersedia. Silakan coba lagi nanti.</p>
+            </div>
+        <% } %>
+    <% } %>
+
+    <!-- Pagination -->
+    <% if (pagination && (pagination.has_next_page || pagination.current_page > 1)) { %>
+        <div class="row mt-5">
+            <div class="col-12">
+                <nav aria-label="Schedule pagination">
+                    <ul class="pagination justify-content-center">
+                        <% if (pagination.current_page > 1) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?<%= currentDay ? 'day=' + currentDay + '&' : '' %>page=<%= pagination.current_page - 1 %>">
+                                    <i class="bi bi-chevron-left"></i> Sebelumnya
+                                </a>
+                            </li>
+                        <% } %>
+                        
+                        <li class="page-item active">
+                            <span class="page-link"><%= pagination.current_page %></span>
+                        </li>
+                        
+                        <% if (pagination.has_next_page) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?<%= currentDay ? 'day=' + currentDay + '&' : '' %>page=<%= pagination.current_page + 1 %>">
+                                    Selanjutnya <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        <% } %>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Info Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-info-circle text-info me-2"></i>
+                        Informasi Jadwal
+                    </h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Jadwal berdasarkan waktu Jepang (JST)
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Data diperbarui secara otomatis dari MyAnimeList
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Tambahkan anime ke watchlist untuk mendapat notifikasi
+                        </li>
+                        <li class="mb-0">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Klik pada anime untuk melihat detail lengkap
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+

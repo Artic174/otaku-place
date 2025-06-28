@@ -1,0 +1,359 @@
+<%- include('layout-admin') %>
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 fw-bold">
+                        <i class="bi bi-pencil text-primary me-2"></i>
+                        Edit Berita
+                    </h1>
+                    <p class="text-muted">Edit berita: <%= news ? news.title : 'Loading...' %></p>
+                </div>
+                <div class="btn-group">
+                    <a href="/admin/news" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>
+                        Kembali
+                    </a>
+                    <% if (news) { %>
+                        <a href="/news/<%= news.id %>" target="_blank" class="btn btn-outline-info">
+                            <i class="bi bi-eye me-2"></i>
+                            Lihat
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Messages -->
+    <% if (error) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% } %>
+
+    <% if (news) { %>
+        <!-- Edit News Form -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-newspaper me-2"></i>
+                            Form Edit Berita
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/news/edit/<%= news.id %>" method="POST" enctype="multipart/form-data">
+                            <!-- Title -->
+                            <div class="mb-3">
+                                <label for="title" class="form-label">
+                                    <i class="bi bi-type me-1"></i>
+                                    Judul Berita <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="title" 
+                                       name="title" 
+                                       placeholder="Masukkan judul berita..."
+                                       required
+                                       maxlength="200"
+                                       value="<%= news.title %>">
+                                <div class="form-text">Maksimal 200 karakter</div>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="mb-3">
+                                <label for="content" class="form-label">
+                                    <i class="bi bi-text-paragraph me-1"></i>
+                                    Isi Berita <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control" 
+                                          id="content" 
+                                          name="content" 
+                                          rows="10"
+                                          placeholder="Tulis isi berita di sini..."
+                                          required><%= news.content %></textarea>
+                                <div class="form-text">Gunakan format teks biasa. Paragraf akan dipisahkan otomatis.</div>
+                            </div>
+
+                            <!-- Current Image -->
+                            <% if (news.image_url) { %>
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-image me-1"></i>
+                                        Gambar Saat Ini
+                                    </label>
+                                    <div class="card">
+                                        <div class="card-body p-2">
+                                            <img src="<%= news.image_url %>" 
+                                                 alt="Current image" 
+                                                 class="img-fluid rounded"
+                                                 style="max-height: 200px;">
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-link me-1"></i>
+                                                    <%= news.image_url %>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+
+                            <!-- Image Upload -->
+                            <div class="mb-3">
+                                <label for="image" class="form-label">
+                                    <i class="bi bi-image me-1"></i>
+                                    Ganti Gambar
+                                </label>
+                                <input type="file" 
+                                       class="form-control" 
+                                       id="image" 
+                                       name="image"
+                                       accept="image/*">
+                                <div class="form-text">
+                                    Format yang didukung: JPG, PNG, GIF. Maksimal 5MB.
+                                    <br>Kosongkan jika tidak ingin mengganti gambar.
+                                </div>
+                            </div>
+
+                            <!-- Image URL Alternative -->
+                            <div class="mb-4">
+                                <label for="image_url" class="form-label">
+                                    <i class="bi bi-link me-1"></i>
+                                    Atau URL Gambar Baru
+                                </label>
+                                <input type="url" 
+                                       class="form-control" 
+                                       id="image_url" 
+                                       name="image_url" 
+                                       placeholder="https://example.com/image.jpg"
+                                       value="<%= news.image_url || '' %>">
+                                <div class="form-text">Jika tidak upload file, Anda bisa menggunakan URL gambar dari internet.</div>
+                            </div>
+
+                            <!-- Submit Buttons -->
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    Update Berita
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>
+                                    Reset
+                                </button>
+                                <a href="/admin/news" class="btn btn-outline-danger">
+                                    <i class="bi bi-x-circle me-2"></i>
+                                    Batal
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- News Info -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Informasi Berita
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <strong>ID:</strong> #<%= news.id %>
+                            </li>
+                            <li class="mb-2">
+                                <strong>Dibuat:</strong><br>
+                                <small class="text-muted">
+                                    <%= new Date(news.created_at).toLocaleDateString('id-ID', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    }) %>
+                                </small>
+                            </li>
+                            <% if (news.updated_at && news.updated_at !== news.created_at) { %>
+                                <li class="mb-2">
+                                    <strong>Diupdate:</strong><br>
+                                    <small class="text-muted">
+                                        <%= new Date(news.updated_at).toLocaleDateString('id-ID', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        }) %>
+                                    </small>
+                                </li>
+                            <% } %>
+                            <li class="mb-0">
+                                <strong>Status:</strong>
+                                <span class="badge bg-success">Published</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="bi bi-eye me-2"></i>
+                            Preview
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="preview">
+                            <!-- Initial preview will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="bi bi-gear me-2"></i>
+                            Aksi Lainnya
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/news/<%= news.id %>" target="_blank" class="btn btn-outline-info btn-sm">
+                                <i class="bi bi-eye me-2"></i>
+                                Lihat di Website
+                            </a>
+                            <button type="button" 
+                                    class="btn btn-outline-danger btn-sm"
+                                    onclick="confirmDelete(<%= news.id %>, '<%= news.title.replace(/'/g, "\\'") %>')">
+                                <i class="bi bi-trash me-2"></i>
+                                Hapus Berita
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } else { %>
+        <!-- News Not Found -->
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="bi bi-exclamation-triangle" style="font-size: 4rem; color: var(--text-secondary);"></i>
+                    <h4 class="mt-3">Berita Tidak Ditemukan</h4>
+                    <p class="text-muted">Berita yang Anda cari tidak ditemukan atau telah dihapus.</p>
+                    <a href="/admin/news" class="btn btn-primary">
+                        <i class="bi bi-arrow-left me-2"></i>Kembali ke Daftar Berita
+                    </a>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                    Konfirmasi Hapus
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus berita ini?</p>
+                <div class="alert alert-warning">
+                    <strong id="newsTitle"></strong>
+                </div>
+                <p class="text-muted small">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <a href="#" id="deleteConfirmBtn" class="btn btn-danger">
+                    <i class="bi bi-trash me-2"></i>Hapus
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Live preview
+function updatePreview() {
+    const title = document.getElementById('title').value;
+    const content = document.getElementById('content').value;
+    const imageUrl = document.getElementById('image_url').value;
+    
+    let previewHtml = `
+        <div class="preview-news">
+            ${imageUrl ? `<img src="${imageUrl}" class="img-fluid rounded mb-3" style="max-height: 200px; width: 100%; object-fit: cover;" onerror="this.style.display='none'">` : ''}
+            <h6 class="fw-bold">${title || 'Judul berita...'}</h6>
+            <p class="small text-muted">${content ? (content.substring(0, 150) + (content.length > 150 ? '...' : '')) : 'Isi berita...'}</p>
+            <small class="text-muted">
+                <i class="bi bi-calendar me-1"></i>
+                ${new Date().toLocaleDateString('id-ID')}
+            </small>
+        </div>
+    `;
+    
+    document.getElementById('preview').innerHTML = previewHtml;
+}
+
+// Reset form
+function resetForm() {
+    if (confirm('Apakah Anda yakin ingin mereset form? Perubahan akan hilang.')) {
+        location.reload();
+    }
+}
+
+// Delete confirmation
+function confirmDelete(newsId, newsTitle) {
+    document.getElementById('newsTitle').textContent = newsTitle;
+    document.getElementById('deleteConfirmBtn').href = `/admin/news/delete/${newsId}`;
+    
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+
+// Event listeners
+document.getElementById('title').addEventListener('input', updatePreview);
+document.getElementById('content').addEventListener('input', updatePreview);
+document.getElementById('image_url').addEventListener('input', updatePreview);
+
+// Character counter for title
+document.getElementById('title').addEventListener('input', function() {
+    const current = this.value.length;
+    const max = 200;
+    const remaining = max - current;
+    
+    let helpText = this.nextElementSibling;
+    helpText.textContent = `${remaining} karakter tersisa`;
+    
+    if (remaining < 20) {
+        helpText.className = 'form-text text-warning';
+    } else if (remaining < 0) {
+        helpText.className = 'form-text text-danger';
+    } else {
+        helpText.className = 'form-text';
+    }
+});
+
+// Initial preview update
+updatePreview();
+</script>
+

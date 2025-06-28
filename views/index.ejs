@@ -1,0 +1,277 @@
+<%- include('partials/header') %>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <h1 class="display-4 fw-bold mb-4 fade-in-up">
+                    Selamat Datang di <span class="text-gradient">AnimeHub</span>
+                </h1>
+                <p class="lead mb-4 fade-in-up" style="animation-delay: 0.2s;">
+                    Temukan anime favorit Anda, ikuti jadwal rilis terbaru, dan bergabung dengan komunitas anime Indonesia.
+                </p>
+                <div class="d-flex gap-3 fade-in-up" style="animation-delay: 0.4s;">
+                    <a href="/search" class="btn btn-primary btn-lg">
+                        <i class="bi bi-search me-2"></i>Jelajahi Anime
+                    </a>
+                    <a href="/schedules" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-calendar-week me-2"></i>Lihat Jadwal
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="hero-image fade-in-up" style="animation-delay: 0.6s;">
+                    <i class="bi bi-play-circle-fill" style="font-size: 15rem; color: var(--primary-color); opacity: 0.8;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Error Alert -->
+<% if (error) { %>
+<div class="container mt-4">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+<% } %>
+
+<!-- Top Anime Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="fw-bold mb-3">
+                    <i class="bi bi-star-fill text-warning me-2"></i>
+                    Anime Populer
+                </h2>
+                <p class="text-muted">Anime dengan rating tertinggi dan paling populer</p>
+            </div>
+        </div>
+        
+        <div class="anime-grid">
+            <% if (topAnime && topAnime.length > 0) { %>
+                <% topAnime.slice(0, 12).forEach(anime => { %>
+                    <div class="anime-card">
+                        <a href="/anime/<%= anime.mal_id %>" class="text-decoration-none">
+                            <img src="<%= anime.images.jpg.large_image_url %>" 
+                                 alt="<%= anime.title %>" 
+                                 loading="lazy">
+                            
+                            <% if (anime.score) { %>
+                                <div class="score-badge">
+                                    <i class="bi bi-star-fill me-1"></i><%= anime.score %>
+                                </div>
+                            <% } %>
+                            
+                            <div class="anime-card-overlay">
+                                <div class="anime-title"><%= anime.title %></div>
+                                <div class="anime-info">
+                                    <% if (anime.type) { %>
+                                        <span class="badge bg-primary me-2"><%= anime.type %></span>
+                                    <% } %>
+                                    <% if (anime.episodes) { %>
+                                        <span class="text-muted"><%= anime.episodes %> Episode</span>
+                                    <% } %>
+                                </div>
+                                <% if (anime.status) { %>
+                                    <div class="mt-2">
+                                        <span class="status-badge <%= anime.status === 'Currently Airing' ? 'status-airing' : anime.status === 'Finished Airing' ? 'status-finished' : 'status-upcoming' %>">
+                                            <%= anime.status %>
+                                        </span>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </a>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-emoji-frown" style="font-size: 3rem; color: var(--text-secondary);"></i>
+                    <p class="text-muted mt-3">Tidak ada data anime populer saat ini</p>
+                </div>
+            <% } %>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="/search" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-right me-2"></i>Lihat Semua Anime
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Current Season Section -->
+<section class="py-5 bg-dark">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="fw-bold mb-3">
+                    <i class="bi bi-calendar-event text-success me-2"></i>
+                    Anime Season Ini
+                </h2>
+                <p class="text-muted">Anime yang sedang tayang di season saat ini</p>
+            </div>
+        </div>
+        
+        <div class="anime-grid">
+            <% if (currentSeason && currentSeason.length > 0) { %>
+                <% currentSeason.slice(0, 8).forEach(anime => { %>
+                    <div class="anime-card">
+                        <a href="/anime/<%= anime.mal_id %>" class="text-decoration-none">
+                            <img src="<%= anime.images.jpg.large_image_url %>" 
+                                 alt="<%= anime.title %>" 
+                                 loading="lazy">
+                            
+                            <% if (anime.score) { %>
+                                <div class="score-badge">
+                                    <i class="bi bi-star-fill me-1"></i><%= anime.score %>
+                                </div>
+                            <% } %>
+                            
+                            <div class="anime-card-overlay">
+                                <div class="anime-title"><%= anime.title %></div>
+                                <div class="anime-info">
+                                    <% if (anime.type) { %>
+                                        <span class="badge bg-success me-2"><%= anime.type %></span>
+                                    <% } %>
+                                    <% if (anime.episodes) { %>
+                                        <span class="text-muted"><%= anime.episodes %> Episode</span>
+                                    <% } %>
+                                </div>
+                                <% if (anime.broadcast && anime.broadcast.day) { %>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="bi bi-broadcast me-1"></i>
+                                            <%= anime.broadcast.day %> <%= anime.broadcast.time || '' %>
+                                        </small>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </a>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-calendar-x" style="font-size: 3rem; color: var(--text-secondary);"></i>
+                    <p class="text-muted mt-3">Tidak ada data anime season saat ini</p>
+                </div>
+            <% } %>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="/schedules" class="btn btn-outline-success">
+                <i class="bi bi-calendar-week me-2"></i>Lihat Jadwal Lengkap
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Recent News Section -->
+<% if (recentNews && recentNews.length > 0) { %>
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="fw-bold mb-3">
+                    <i class="bi bi-newspaper text-info me-2"></i>
+                    Berita Terbaru
+                </h2>
+                <p class="text-muted">Update terbaru seputar dunia anime</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <% recentNews.forEach(news => { %>
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <% if (news.image_url) { %>
+                            <img src="<%= news.image_url %>" class="card-img-top" alt="<%= news.title %>" style="height: 200px;">
+                        <% } %>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <a href="/news/<%= news.id %>" class="text-decoration-none text-light">
+                                    <%= news.title %>
+                                </a>
+                            </h5>
+                            <p class="card-text text-muted flex-grow-1">
+                                <%= news.content.substring(0, 150) %>...
+                            </p>
+                            <div class="mt-auto">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    <%= new Date(news.created_at).toLocaleDateString('id-ID') %>
+                                </small>
+                                <a href="/news/<%= news.id %>" class="btn btn-sm btn-outline-primary float-end">
+                                    Baca Selengkapnya
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="/news" class="btn btn-outline-info">
+                <i class="bi bi-newspaper me-2"></i>Lihat Semua Berita
+            </a>
+        </div>
+    </div>
+</section>
+<% } %>
+
+<!-- Quick Actions Section -->
+<section class="py-5 bg-dark">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 border-0 bg-transparent">
+                    <div class="card-body">
+                        <i class="bi bi-search" style="font-size: 3rem; color: var(--primary-color);"></i>
+                        <h5 class="card-title mt-3">Cari Anime</h5>
+                        <p class="card-text text-muted">Temukan anime berdasarkan judul, genre, atau studio</p>
+                        <a href="/search" class="btn btn-outline-primary">Mulai Pencarian</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 border-0 bg-transparent">
+                    <div class="card-body">
+                        <i class="bi bi-calendar-week" style="font-size: 3rem; color: var(--success);"></i>
+                        <h5 class="card-title mt-3">Jadwal Tayang</h5>
+                        <p class="card-text text-muted">Lihat jadwal anime yang tayang setiap hari</p>
+                        <a href="/schedules" class="btn btn-outline-success">Lihat Jadwal</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 border-0 bg-transparent">
+                    <div class="card-body">
+                        <i class="bi bi-bookmark-heart" style="font-size: 3rem; color: var(--danger);"></i>
+                        <h5 class="card-title mt-3">Watchlist</h5>
+                        <p class="card-text text-muted">Simpan anime favorit dalam daftar tontonan</p>
+                        <a href="/watchlist" class="btn btn-outline-danger">Buka Watchlist</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 border-0 bg-transparent">
+                    <div class="card-body">
+                        <i class="bi bi-chat-dots" style="font-size: 3rem; color: var(--warning);"></i>
+                        <h5 class="card-title mt-3">Forum Diskusi</h5>
+                        <p class="card-text text-muted">Bergabung dalam diskusi dengan sesama penggemar anime</p>
+                        <a href="/forum" class="btn btn-outline-warning">Join Forum</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('partials/footer') %>
+

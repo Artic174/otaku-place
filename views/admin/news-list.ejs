@@ -1,0 +1,204 @@
+<%- include('layout-admin') %>
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 fw-bold">
+                        <i class="bi bi-newspaper text-primary me-2"></i>
+                        Kelola Berita
+                    </h1>
+                    <p class="text-muted">Kelola semua berita anime di website</p>
+                </div>
+                <a href="/admin/news/add" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Tambah Berita
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <% if (success) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <%= success %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% } %>
+
+    <% if (error) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% } %>
+
+    <!-- News List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Daftar Berita</h5>
+                        <span class="badge bg-primary">
+                            Total: <%= news ? news.length : 0 %> berita
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <% if (news && news.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Judul</th>
+                                        <th>Tanggal</th>
+                                        <th>Status</th>
+                                        <th width="200">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% news.forEach(item => { %>
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-secondary">#<%= item.id %></span>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <h6 class="mb-1"><%= item.title %></h6>
+                                                    <small class="text-muted">
+                                                        <%= item.content.substring(0, 100) %>...
+                                                    </small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-calendar me-1"></i>
+                                                    <%= new Date(item.created_at).toLocaleDateString('id-ID', {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    }) %>
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">Published</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="/news/<%= item.id %>" 
+                                                       target="_blank" 
+                                                       class="btn btn-outline-secondary"
+                                                       title="Lihat">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a href="/admin/news/edit/<%= item.id %>" 
+                                                       class="btn btn-outline-primary"
+                                                       title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-outline-danger"
+                                                            title="Hapus"
+                                                            onclick="confirmDelete(<%= item.id %>, '<%= item.title.replace(/'/g, "\\'") %>')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <% if (pagination && (pagination.totalPages > 1)) { %>
+                            <div class="card-footer">
+                                <nav aria-label="News pagination">
+                                    <ul class="pagination justify-content-center mb-0">
+                                        <% if (pagination.currentPage > 1) { %>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=<%= pagination.currentPage - 1 %>">
+                                                    <i class="bi bi-chevron-left"></i> Sebelumnya
+                                                </a>
+                                            </li>
+                                        <% } %>
+                                        
+                                        <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                                            <li class="page-item <%= i === pagination.currentPage ? 'active' : '' %>">
+                                                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                            </li>
+                                        <% } %>
+                                        
+                                        <% if (pagination.currentPage < pagination.totalPages) { %>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=<%= pagination.currentPage + 1 %>">
+                                                    Selanjutnya <i class="bi bi-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                        <% } %>
+                                    </ul>
+                                </nav>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <div class="text-center py-5">
+                            <i class="bi bi-newspaper" style="font-size: 4rem; color: var(--text-secondary);"></i>
+                            <h4 class="mt-3">Belum Ada Berita</h4>
+                            <p class="text-muted">Mulai dengan menambahkan berita pertama</p>
+                            <a href="/admin/news/add" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>Tambah Berita
+                            </a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                    Konfirmasi Hapus
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus berita ini?</p>
+                <div class="alert alert-warning">
+                    <strong id="newsTitle"></strong>
+                </div>
+                <p class="text-muted small">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <a href="#" id="deleteConfirmBtn" class="btn btn-danger">
+                    <i class="bi bi-trash me-2"></i>Hapus
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(newsId, newsTitle) {
+    document.getElementById('newsTitle').textContent = newsTitle;
+    document.getElementById('deleteConfirmBtn').href = `/admin/news/delete/${newsId}`;
+    
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+</script>
+

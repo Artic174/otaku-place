@@ -1,0 +1,285 @@
+<%- include('partials/header') %>
+
+<div class="container py-5">
+    <!-- Error Alert -->
+    <% if (error) { %>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% } %>
+
+    <% if (anime) { %>
+        <!-- Anime Header -->
+        <div class="row mb-5">
+            <div class="col-lg-4 mb-4">
+                <div class="position-relative">
+                    <img src="<%= anime.images.jpg.large_image_url %>" 
+                         alt="<%= anime.title %>" 
+                         class="img-fluid rounded shadow-custom"
+                         style="width: 100%; max-width: 400px;">
+                    
+                    <% if (anime.score) { %>
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <div class="bg-gradient text-white px-3 py-2 rounded-pill">
+                                <i class="bi bi-star-fill me-1"></i>
+                                <strong><%= anime.score %></strong>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 mt-3">
+                    <button class="btn btn-primary add-to-watchlist" 
+                            data-anime-id="<%= anime.mal_id %>"
+                            data-anime-title="<%= anime.title %>"
+                            data-anime-image="<%= anime.images.jpg.large_image_url %>">
+                        <i class="bi bi-bookmark-plus me-2"></i>Tambah ke Watchlist
+                    </button>
+                    
+                    <% if (anime.trailer && anime.trailer.url) { %>
+                        <a href="<%= anime.trailer.url %>" target="_blank" class="btn btn-outline-primary">
+                            <i class="bi bi-play-circle me-2"></i>Tonton Trailer
+                        </a>
+                    <% } %>
+                    
+                    <% if (anime.url) { %>
+                        <a href="<%= anime.url %>" target="_blank" class="btn btn-outline-secondary">
+                            <i class="bi bi-box-arrow-up-right me-2"></i>Lihat di MyAnimeList
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+            
+            <div class="col-lg-8">
+                <div class="mb-3">
+                    <h1 class="display-6 fw-bold mb-2"><%= anime.title %></h1>
+                    
+                    <% if (anime.title_english && anime.title_english !== anime.title) { %>
+                        <h2 class="h4 text-muted mb-2"><%= anime.title_english %></h2>
+                    <% } %>
+                    
+                    <% if (anime.title_japanese && anime.title_japanese !== anime.title) { %>
+                        <h3 class="h5 text-muted mb-3"><%= anime.title_japanese %></h3>
+                    <% } %>
+                </div>
+
+                <!-- Status Badges -->
+                <div class="mb-4">
+                    <% if (anime.status) { %>
+                        <span class="badge bg-primary me-2 p-2"><%= anime.status %></span>
+                    <% } %>
+                    <% if (anime.type) { %>
+                        <span class="badge bg-success me-2 p-2"><%= anime.type %></span>
+                    <% } %>
+                    <% if (anime.rating) { %>
+                        <span class="badge bg-warning me-2 p-2"><%= anime.rating %></span>
+                    <% } %>
+                </div>
+
+                <!-- Anime Info Grid -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Informasi Dasar</h5>
+                                <ul class="list-unstyled">
+                                    <% if (anime.episodes) { %>
+                                        <li><strong>Episode:</strong> <%= anime.episodes %></li>
+                                    <% } %>
+                                    <% if (anime.duration) { %>
+                                        <li><strong>Durasi:</strong> <%= anime.duration %></li>
+                                    <% } %>
+                                    <% if (anime.source) { %>
+                                        <li><strong>Sumber:</strong> <%= anime.source %></li>
+                                    <% } %>
+                                    <% if (anime.season && anime.year) { %>
+                                        <li><strong>Season:</strong> <%= anime.season %> <%= anime.year %></li>
+                                    <% } %>
+                                    <% if (anime.broadcast && anime.broadcast.day) { %>
+                                        <li><strong>Tayang:</strong> <%= anime.broadcast.day %> <%= anime.broadcast.time || '' %></li>
+                                    <% } %>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Statistik</h5>
+                                <ul class="list-unstyled">
+                                    <% if (anime.score) { %>
+                                        <li><strong>Rating:</strong> <%= anime.score %>/10</li>
+                                    <% } %>
+                                    <% if (anime.scored_by) { %>
+                                        <li><strong>Dinilai oleh:</strong> <%= anime.scored_by.toLocaleString() %> pengguna</li>
+                                    <% } %>
+                                    <% if (anime.rank) { %>
+                                        <li><strong>Peringkat:</strong> #<%= anime.rank %></li>
+                                    <% } %>
+                                    <% if (anime.popularity) { %>
+                                        <li><strong>Popularitas:</strong> #<%= anime.popularity %></li>
+                                    <% } %>
+                                    <% if (anime.members) { %>
+                                        <li><strong>Anggota:</strong> <%= anime.members.toLocaleString() %></li>
+                                    <% } %>
+                                    <% if (anime.favorites) { %>
+                                        <li><strong>Favorit:</strong> <%= anime.favorites.toLocaleString() %></li>
+                                    <% } %>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Synopsis -->
+                <% if (anime.synopsis) { %>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Sinopsis</h5>
+                            <p class="card-text"><%= anime.synopsis %></p>
+                        </div>
+                    </div>
+                <% } %>
+
+                <!-- Background -->
+                <% if (anime.background) { %>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Latar Belakang</h5>
+                            <p class="card-text"><%= anime.background %></p>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Additional Info Sections -->
+        <div class="row mb-5">
+            <!-- Genres -->
+            <% if (anime.genres && anime.genres.length > 0) { %>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-tags me-2"></i>Genre
+                            </h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                <% anime.genres.forEach(genre => { %>
+                                    <a href="/search?genre=<%= genre.mal_id %>" class="badge bg-primary text-decoration-none p-2">
+                                        <%= genre.name %>
+                                    </a>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Studios -->
+            <% if (anime.studios && anime.studios.length > 0) { %>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-building me-2"></i>Studio
+                            </h5>
+                            <ul class="list-unstyled">
+                                <% anime.studios.forEach(studio => { %>
+                                    <li><%= studio.name %></li>
+                                <% }) %>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Producers -->
+            <% if (anime.producers && anime.producers.length > 0) { %>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-camera-reels me-2"></i>Produser
+                            </h5>
+                            <ul class="list-unstyled">
+                                <% anime.producers.slice(0, 5).forEach(producer => { %>
+                                    <li><%= producer.name %></li>
+                                <% }) %>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-chat-dots me-2"></i>
+                            Komentar (<%= comments ? comments.length : 0 %>)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Comment Form -->
+                        <form id="commentForm" class="mb-4">
+                            <input type="hidden" name="anime_id" value="<%= anime.mal_id %>">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <input type="text" name="username" class="form-control" placeholder="Nama Anda" required maxlength="50">
+                                </div>
+                                <div class="col-md-8 mb-3">
+                                    <textarea name="comment" class="form-control" rows="3" placeholder="Tulis komentar Anda..." required maxlength="1000"></textarea>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send me-2"></i>Kirim Komentar
+                            </button>
+                        </form>
+
+                        <!-- Comments List -->
+                        <% if (comments && comments.length > 0) { %>
+                            <div class="comments-list">
+                                <% comments.forEach(comment => { %>
+                                    <div class="comment-item">
+                                        <div class="comment-author">
+                                            <i class="bi bi-person-circle me-2"></i>
+                                            <%= comment.username %>
+                                        </div>
+                                        <div class="comment-date">
+                                            <i class="bi bi-clock me-1"></i>
+                                            <%= new Date(comment.created_at).toLocaleDateString('id-ID', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            }) %>
+                                        </div>
+                                        <div class="comment-content">
+                                            <%= comment.comment %>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <div class="text-center py-4">
+                                <i class="bi bi-chat" style="font-size: 3rem; color: var(--text-secondary);"></i>
+                                <p class="text-muted mt-2">Belum ada komentar. Jadilah yang pertama berkomentar!</p>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
+
